@@ -7,7 +7,7 @@ import { Ministry } from '../types';
 const MinistryCard: React.FC<{ ministry: Ministry }> = ({ ministry }) => (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
         <h3 className="font-bold text-lg text-primary">{ministry.name}</h3>
-        <p className="text-sm text-gray-600 mt-1">{ministry.description}</p>
+        <p className="text-sm text-gray-600 mt-1 text-justify">{ministry.description}</p>
         <p className="text-sm text-gray-500 mt-2 font-mono">{ministry.contact}</p>
         <div className="flex justify-between mt-3 text-sm">
             <span className="font-semibold text-gray-700">Managed: {ministry.issuesManaged}</span>

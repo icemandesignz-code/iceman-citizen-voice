@@ -7,6 +7,8 @@ export enum Page {
   Resources = 'Resources',
   SOS = 'SOS',
   Profile = 'Profile',
+  Map = 'Map',
+  Communities = 'Communities',
 }
 
 export enum IssueCategory {
@@ -46,13 +48,17 @@ export interface Comment {
 }
 
 export interface Issue {
-  id: string;
+  id:string;
   title: string;
   summary: string;
   description: string;
   author: User;
   category: IssueCategory;
   location: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
   timestamp: string;
   status: IssueStatus;
   priority: IssuePriority;
@@ -61,6 +67,7 @@ export interface Issue {
     videos: string[];
     audio: string[];
   };
+  isAnonymous?: boolean;
   comments: Comment[];
 }
 

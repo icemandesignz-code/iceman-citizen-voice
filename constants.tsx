@@ -6,6 +6,7 @@ const user1: User = { id: 'u1', name: 'Maria Rodriguez', avatar: 'M', location: 
 const user2: User = { id: 'u2', name: 'John Doe', avatar: 'J', location: 'Linden, Region 10', isVerified: false };
 const user3: User = { id: 'u3', name: 'Admin', avatar: 'A', location: 'Gov', isVerified: true };
 export const MOCK_CURRENT_USER: User = { id: 'u5', name: 'Ravi Kumar', avatar: 'R', location: 'Georgetown, Region 4', isVerified: true };
+export const ANONYMOUS_USER: User = { id: 'anonymous', name: 'Anonymous Citizen', avatar: '?', location: 'Guyana', isVerified: false };
 
 
 // Mock Issues
@@ -18,6 +19,7 @@ export const MOCK_ISSUES: Issue[] = [
     author: user1,
     category: IssueCategory.Infrastructure,
     location: 'Georgetown, Region 4',
+    coordinates: { lat: 6.8045, lng: -58.1561 },
     timestamp: '2 hours ago',
     status: IssueStatus.Pending,
     priority: IssuePriority.High,
@@ -39,9 +41,11 @@ export const MOCK_ISSUES: Issue[] = [
     author: user2,
     category: IssueCategory.Health,
     location: 'Linden, Region 10',
+    coordinates: { lat: 6.0125, lng: -58.3033 },
     timestamp: '1 day ago',
     status: IssueStatus.Approved,
     priority: IssuePriority.Medium,
+    isAnonymous: true,
     media: {
       photos: ['https://picsum.photos/seed/clinic1/400/300'],
       videos: ['https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'],
@@ -57,6 +61,7 @@ export const MOCK_ISSUES: Issue[] = [
     author: MOCK_CURRENT_USER,
     category: IssueCategory.Education,
     location: 'Georgetown, Region 4',
+    coordinates: { lat: 6.8011, lng: -58.1636 },
     timestamp: '2 days ago',
     status: IssueStatus.Pending,
     priority: IssuePriority.Low,
@@ -73,6 +78,7 @@ export const MOCK_ISSUES: Issue[] = [
     author: { id: 'u4', name: 'Concerned Parent', avatar: 'C', location: 'New Amsterdam, Region 6', isVerified: false },
     category: IssueCategory.Education,
     location: 'New Amsterdam, Region 6',
+    coordinates: { lat: 6.2497, lng: -57.5132 },
     timestamp: '3 days ago',
     status: IssueStatus.Pending,
     priority: IssuePriority.Medium,
@@ -87,6 +93,7 @@ export const MOCK_ISSUES: Issue[] = [
     author: user1,
     category: IssueCategory.Infrastructure,
     location: 'Georgetown, Region 4',
+    coordinates: { lat: 6.8093, lng: -58.1610 },
     timestamp: '5 days ago',
     status: IssueStatus.Resolved,
     priority: IssuePriority.Critical,
@@ -104,6 +111,7 @@ export const MOCK_ISSUES: Issue[] = [
     author: user2,
     category: IssueCategory.Environment,
     location: 'Linden, Region 10',
+    coordinates: { lat: 6.0089, lng: -58.2995 },
     timestamp: '6 days ago',
     status: IssueStatus.Pending,
     priority: IssuePriority.Medium,
@@ -135,6 +143,9 @@ export const MinistryIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 export const DistrictsIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/><line x1="2" y1="12.25" x2="12" y2="18.75"/><line x1="22" y1="12.25" x2="12" y2="18.75"/></svg>
+);
+export const MapIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
 );
 export const ResourcesIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
@@ -207,4 +218,7 @@ export const MicIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 export const ZapIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+);
+export const ShareIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
 );

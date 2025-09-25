@@ -11,12 +11,14 @@ interface HomePageProps {
 const categories = [IssueCategory.Infrastructure, IssueCategory.Health, IssueCategory.Education, IssueCategory.Environment, IssueCategory.Security];
 
 const HomePage: React.FC<HomePageProps> = ({ issues, onSelectIssue, onReportIssue }) => {
-  const [activeFilter, setActiveFilter] = useState<IssueCategory | 'All'>('All');
+  const [activeCategory, setActiveCategory] = useState<IssueCategory | 'All'>('All');
 
   const filteredIssues = useMemo(() => {
-    if (activeFilter === 'All') return issues;
-    return issues.filter(issue => issue.category === activeFilter);
-  }, [issues, activeFilter]);
+    return issues.filter(issue => {
+        const categoryMatch = activeCategory === 'All' || issue.category === activeCategory;
+        return categoryMatch;
+    });
+  }, [issues, activeCategory]);
   
   const getCategoryCount = (category: IssueCategory | 'All') => {
       if (category === 'All') return issues.length;
@@ -33,30 +35,38 @@ const HomePage: React.FC<HomePageProps> = ({ issues, onSelectIssue, onReportIssu
         </button>
       </div>
 
-      <div>
-        <div className="flex space-x-2 overflow-x-auto pb-2 -mx-4 px-4">
-          <button onClick={() => setActiveFilter('All')} className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${activeFilter === 'All' ? 'bg-primary text-white' : 'bg-white text-gray-600'}`}>
-            All <span className="ml-1 bg-white/20 text-xs px-2 py-0.5 rounded-full">{getCategoryCount('All')}</span>
-          </button>
-          {categories.map(cat => (
-            <button key={cat} onClick={() => setActiveFilter(cat)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${activeFilter === cat ? 'bg-primary text-white' : 'bg-white text-gray-600'}`}>
-              {cat} <span className="ml-1 bg-white/20 text-xs px-2 py-0.5 rounded-full">{getCategoryCount(cat)}</span>
-            </button>
-          ))}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div>
+            <div className="flex space-x-2 overflow-x-auto pt-2 pb-3 -mx-4 px-4">
+              <button onClick={() => setActiveCategory('All')} className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${activeCategory === 'All' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}>
+                All <span className="ml-1 bg-black/10 text-xs px-2 py-0.5 rounded-full">{getCategoryCount('All')}</span>
+              </button>
+              {categories.map(cat => (
+                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${activeCategory === cat ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}>
+                  {cat} <span className="ml-1 bg-black/10 text-xs px-2 py-0.5 rounded-full">{getCategoryCount(cat)}</span>
+                </button>
+              ))}
+            </div>
         </div>
       </div>
-      
+
       <div className="bg-green-100 text-green-800 p-3 rounded-lg flex items-center space-x-2 text-sm">
         <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
         <p>5 new reports in the last 24 hours</p>
       </div>
 
       <div>
-        <h3 className="text-xl font-bold text-dark mb-3">Community Reports</h3>
         <div className="space-y-4">
-          {filteredIssues.map(issue => (
-            <IssueCard key={issue.id} issue={issue} onSelectIssue={onSelectIssue} />
-          ))}
+           {filteredIssues.length > 0 ? (
+            filteredIssues.map(issue => (
+              <IssueCard key={issue.id} issue={issue} onSelectIssue={onSelectIssue} />
+            ))
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-gray-600 font-semibold">No issues found</p>
+              <p className="text-sm text-gray-500">Try adjusting your filters.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

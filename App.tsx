@@ -1,17 +1,20 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Page, Issue, User, IssueStatus, Ministry, District, IssuePriority } from './types';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { Page, Issue, User, IssueStatus, Ministry, District } from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import HomePage from './pages/HomePage';
 import MinistriesPage from './pages/MinistriesPage';
 import DistrictsPage from './pages/DistrictsPage';
-import ResourcesPage from './pages/ResourcesPage';
+import MapPage from './pages/MapPage';
 import EmergencyPage from './pages/EmergencyPage';
 import ProfilePage from './pages/ProfilePage';
 import IssueDetailModal from './components/IssueDetailModal';
 import { MOCK_ISSUES, MOCK_MINISTRIES, MOCK_DISTRICTS, MOCK_CURRENT_USER } from './constants';
 import SearchModal from './components/SearchModal';
 import ReportIssueModal from './components/ReportIssueModal';
+import ProfileDrawer from './components/ProfileDrawer';
+import ResourcesPage from './pages/ResourcesPage';
+import CommunitiesPage from './pages/CommunitiesPage';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
@@ -19,15 +22,30 @@ const App: React.FC = () => {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isReportModalOpen, setReportModalOpen] = useState(false);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
   
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
   const [currentUser, setCurrentUser] = useState<User>(MOCK_CURRENT_USER);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const issueId = urlParams.get('issueId');
+    if (issueId) {
+      const issueToOpen = issues.find(issue => issue.id === issueId);
+      if (issueToOpen) {
+        setSelectedIssue(issueToOpen);
+        // Optional: Clean up the URL to prevent re-opening on refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [issues]);
 
   const navigateTo = (page: Page) => {
     if (page !== currentPage) {
       setPreviousPage(currentPage);
       setCurrentPage(page);
     }
+    setDrawerOpen(false); // Close drawer on any navigation
   };
 
   const handleSelectIssue = useCallback((issue: Issue) => {
@@ -38,11 +56,11 @@ const App: React.FC = () => {
     setSelectedIssue(null);
   }, []);
   
-  const handleAddIssue = (newIssueData: Omit<Issue, 'id' | 'author' | 'timestamp' | 'status' | 'comments'>) => {
+  const handleAddIssue = (newIssueData: Omit<Issue, 'id' | 'author' | 'timestamp' | 'status' | 'comments'> & { isAnonymous: boolean }) => {
     const newIssue: Issue = {
       ...newIssueData,
       id: new Date().toISOString(),
-      author: currentUser,
+      author: newIssueData.isAnonymous ? MOCK_CURRENT_USER : currentUser,
       timestamp: 'Just now',
       status: IssueStatus.Pending,
       comments: [],
@@ -93,7 +111,7 @@ const App: React.FC = () => {
     setIssues(updatedIssues);
   };
 
-  const userIssues = useMemo(() => issues.filter(issue => issue.author.id === currentUser.id), [issues, currentUser.id]);
+  const userIssues = useMemo(() => issues.filter(issue => !issue.isAnonymous && issue.author.id === currentUser.id), [issues, currentUser.id]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -116,6 +134,10 @@ const App: React.FC = () => {
                   onSelectIssue={handleSelectIssue}
                   onBack={() => navigateTo(previousPage)}
                 />;
+      case Page.Map:
+        return <MapPage issues={issues} onSelectIssue={handleSelectIssue} />;
+      case Page.Communities:
+        return <CommunitiesPage />;
       default:
         return <HomePage issues={issues} onSelectIssue={handleSelectIssue} onReportIssue={() => setReportModalOpen(true)} />;
     }
@@ -125,9 +147,15 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans bg-background text-gray-800 flex flex-col max-w-lg mx-auto shadow-2xl relative">
+      <ProfileDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setDrawerOpen(false)} 
+        user={currentUser} 
+        onNavigate={navigateTo}
+      />
       <Header 
         user={currentUser}
-        onProfileClick={() => navigateTo(Page.Profile)}
+        onProfileClick={() => setDrawerOpen(true)}
         onSearchClick={() => setSearchOpen(true)}
         showBackButton={!isBottomNavVisible}
         onBack={() => navigateTo(previousPage)}

@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import React, { useState, useRef, useEffect } from 'react';
 import { Issue, IssueCategory, IssuePriority } from '../types';
-import { XIcon, CameraIcon, VideoIcon, AudioIcon, CrosshairIcon, MicIcon, ZapIcon as MagicIcon } from '../constants';
+import { XIcon, CameraIcon, VideoIcon, AudioIcon, CrosshairIcon, MicIcon, ZapIcon as MagicIcon, MapPinIcon } from '../constants';
 
 // For SpeechRecognition API, which might not be on the window type
 declare global {
@@ -9,12 +9,13 @@ declare global {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
   }
+  const L: any;
 }
 
 interface ReportIssueModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddIssue: (newIssue: Omit<Issue, 'id' | 'author' | 'timestamp' | 'status' | 'comments'>) => void;
+  onAddIssue: (newIssue: Omit<Issue, 'id' | 'author' | 'timestamp' | 'status' | 'comments'> & { isAnonymous: boolean }) => void;
 }
 
 interface PhotoPreview {
@@ -27,11 +28,19 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<IssueCategory>(IssueCategory.Infrastructure);
   const [location, setLocation] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [priority, setPriority] = useState<IssuePriority>(IssuePriority.Medium);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [error, setError] = useState('');
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isSuggestingPriority, setIsSuggestingPriority] = useState(false);
+  const [isMapView, setIsMapView] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [tempCoords, setTempCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [generatedSummary, setGeneratedSummary] = useState('');
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+
 
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [video, setVideo] = useState<File | null>(null);
@@ -44,20 +53,73 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
 
-  // Effect to clean up object URLs
+  // Effect to clean up object URLs and other resources
   useEffect(() => {
     return () => {
       photos.forEach(photo => URL.revokeObjectURL(photo.url));
       if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
       if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
-      // Clean up speech recognition
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (recognitionRef.current) recognitionRef.current.stop();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
   }, [photos, videoPreviewUrl, audioPreviewUrl]);
+
+  useEffect(() => {
+    if (isMapView && mapContainerRef.current && !mapInstanceRef.current) {
+        const map = L.map(mapContainerRef.current).setView([6.5, -58.5], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        map.on('click', (e: any) => {
+            const { lat, lng } = e.latlng;
+            setTempCoords({ lat, lng });
+            if (!markerRef.current) {
+                markerRef.current = L.marker(e.latlng).addTo(map);
+            } else {
+                markerRef.current.setLatLng(e.latlng);
+            }
+        });
+        
+        mapInstanceRef.current = map;
+        setTimeout(() => map.invalidateSize(), 0);
+    }
+  }, [isMapView]);
+
+  const handleConfirmLocation = async () => {
+    if (!tempCoords) return;
+
+    setIsGeocoding(true);
+    setError('');
+
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${tempCoords.lat}&lon=${tempCoords.lng}`);
+        if (!response.ok) throw new Error('Failed to fetch address');
+        const data = await response.json();
+        
+        const displayName = data.display_name || `Lat: ${tempCoords.lat.toFixed(4)}, Lng: ${tempCoords.lng.toFixed(4)}`;
+        
+        setLocation(displayName);
+        setCoordinates(tempCoords);
+        setIsMapView(false);
+    } catch (err) {
+        console.error("Reverse geocoding error:", err);
+        setLocation(`Lat: ${tempCoords.lat.toFixed(4)}, Lng: ${tempCoords.lng.toFixed(4)}`);
+        setCoordinates(tempCoords);
+        setIsMapView(false);
+    } finally {
+        setIsGeocoding(false);
+    }
+  };
+
 
   const handleToggleRecording = () => {
     if (isRecording) {
@@ -149,6 +211,36 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
       setIsSuggestingPriority(false);
     }
   };
+  
+  const handleGenerateSummary = async () => {
+    if (!description.trim()) {
+      setError("Please provide a description before generating a summary.");
+      return;
+    }
+    setError('');
+    setIsGeneratingSummary(true);
+    setGeneratedSummary('');
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: `Based on the following civic issue report, generate a concise, one-sentence summary of 100 characters or less. The summary should capture the main problem. Description: "${description}"`,
+      });
+      const summaryText = response.text;
+      
+      if (summaryText) {
+        setGeneratedSummary(summaryText.trim());
+      } else {
+        setError("AI could not generate a summary. You can write one manually or try again.");
+      }
+    } catch (e) {
+      console.error("Error generating summary with AI:", e);
+      setError("Failed to generate summary. Please try again or proceed without it.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -160,10 +252,22 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
     setError('');
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords;
-        setLocation(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`);
-        setIsFetchingLocation(false);
+        const coords = { lat: latitude, lng: longitude };
+        setCoordinates(coords);
+        
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}`);
+            if (!response.ok) throw new Error('Reverse geocoding failed');
+            const data = await response.json();
+            setLocation(data.display_name || `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`);
+        } catch (err) {
+            console.error("Error fetching location name:", err);
+            setLocation(`${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`);
+        } finally {
+            setIsFetchingLocation(false);
+        }
       },
       (geoError) => {
         switch (geoError.code) {
@@ -236,9 +340,19 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setGeneratedSummary('');
     setCategory(IssueCategory.Infrastructure);
     setLocation('');
+    setCoordinates(null);
+    setTempCoords(null);
+    setIsMapView(false);
+    if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markerRef.current = null;
+    }
     setPriority(IssuePriority.Medium);
+    setIsAnonymous(false);
     setError('');
     setPhotos([]);
     clearVideo();
@@ -248,17 +362,23 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !location) {
-      setError('Please fill in all required fields.');
+      setError('Please fill in the title, description, and location.');
+      return;
+    }
+    if (!coordinates) {
+      setError('Please set a location on the map or use your current location for accurate reporting.');
       return;
     }
     
     onAddIssue({
       title,
-      summary: description.substring(0, 100) + '...', // Auto-generate summary
+      summary: generatedSummary || description.substring(0, 100) + '...',
       description,
       category,
       location,
+      coordinates,
       priority,
+      isAnonymous,
       media: {
         photos: photos.map(p => p.file.name),
         videos: video ? [video.name] : [],
@@ -308,6 +428,21 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
                 </button>
             </div>
             {isRecording && <p className="text-sm text-danger mt-1 animate-pulse">Listening...</p>}
+            <button
+                type="button"
+                onClick={handleGenerateSummary}
+                disabled={isGeneratingSummary || !description.trim()}
+                className="mt-2 flex items-center justify-center space-x-2 w-full border border-primary text-primary font-semibold py-2 px-4 rounded-lg hover:bg-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+                <MagicIcon className={`w-5 h-5 ${isGeneratingSummary ? 'animate-pulse' : ''}`} />
+                <span>{isGeneratingSummary ? 'Generating Summary...' : 'Generate Summary with AI'}</span>
+            </button>
+            {generatedSummary && (
+                <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-500">Suggested Summary:</label>
+                    <p className="mt-1 p-3 bg-gray-100 rounded-md text-sm text-gray-800 border border-gray-200 text-justify">{generatedSummary}</p>
+                </div>
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-4">
@@ -339,25 +474,60 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
 
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-            <div className="relative mt-1">
-                <input 
-                    type="text" 
-                    id="location" 
-                    value={location} 
-                    onChange={(e) => setLocation(e.target.value)} 
-                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10" 
-                    placeholder={isFetchingLocation ? "Fetching location..." : "e.g., Georgetown, Region 4"}
-                    disabled={isFetchingLocation}
-                />
-                <button 
-                    type="button" 
-                    onClick={handleGetLocation} 
-                    disabled={isFetchingLocation}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-primary disabled:opacity-50 disabled:cursor-wait"
-                    aria-label="Get current location"
-                >
-                    <CrosshairIcon className="w-5 h-5" />
-                </button>
+            {isMapView ? (
+                <div className="mt-2">
+                    <div ref={mapContainerRef} className="h-64 w-full rounded-lg z-0 border"></div>
+                    {isGeocoding && <p className="text-sm text-gray-500 mt-2 animate-pulse">Fetching address...</p>}
+                    <div className="flex justify-end space-x-2 mt-2">
+                        <button type="button" onClick={() => setIsMapView(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                        <button type="button" onClick={handleConfirmLocation} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-secondary disabled:opacity-50" disabled={!tempCoords || isGeocoding}>
+                          {isGeocoding ? 'Locating...' : 'Confirm Location'}
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="mt-1">
+                    <input 
+                        type="text" 
+                        id="location" 
+                        value={location} 
+                        onChange={(e) => {
+                            setLocation(e.target.value);
+                            setCoordinates(null);
+                        }}
+                        className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        placeholder={isFetchingLocation ? "Getting current location..." : "Type an address or use buttons"}
+                    />
+                    <div className="flex space-x-2 mt-2 text-sm">
+                        <button type="button" onClick={handleGetLocation} disabled={isFetchingLocation} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 py-2 rounded-md hover:bg-gray-50 disabled:opacity-50">
+                            <CrosshairIcon className="w-4 h-4" />
+                            <span>Current Location</span>
+                        </button>
+                        <button type="button" onClick={() => setIsMapView(true)} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 py-2 rounded-md hover:bg-gray-50">
+                            <MapPinIcon className="w-4 h-4" />
+                            <span>Select on Map</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+          </div>
+          
+          <div className="relative flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="anonymous"
+                name="anonymous"
+                type="checkbox"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
+              />
+            </div>
+            <div className="ml-3 text-sm">
+              <label htmlFor="anonymous" className="font-medium text-gray-700">
+                Report Anonymously
+              </label>
+              <p className="text-gray-500 text-justify">Your identity will be hidden from the public if you check this box.</p>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Issue, IssueStatus, IssuePriority } from '../types';
-import { XIcon, MapPinIcon, CheckCircleIcon, MessageSquareIcon, AudioIcon, VideoIcon, SearchIcon, AlertTriangleIcon, ZapIcon } from '../constants';
+import { XIcon, MapPinIcon, CheckCircleIcon, MessageSquareIcon, AudioIcon, VideoIcon, SearchIcon, AlertTriangleIcon, ZapIcon, ShareIcon, SoundIcon } from '../constants';
+import { ANONYMOUS_USER } from '../constants';
 
 interface IssueDetailModalProps {
   issue: Issue | null;
@@ -52,8 +53,86 @@ const PriorityBadge: React.FC<{ priority: IssuePriority }> = ({ priority }) => {
 
 const IssueDetailModal: React.FC<IssueDetailModalProps> = ({ issue, onClose, onUpdateStatus }) => {
   const [playingVideoUrl, setPlayingVideoUrl] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [highlightedDescription, setHighlightedDescription] = useState('');
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Cleanup speech synthesis on modal close
+  useEffect(() => {
+    return () => {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+    };
+  }, []);
 
   if (!issue) return null;
+  
+  const displayAuthor = issue.isAnonymous ? ANONYMOUS_USER : issue.author;
+
+  const handleShare = async () => {
+    if (!issue) return;
+
+    const shareUrl = `${window.location.origin}?issueId=${issue.id}`;
+    const shareData = {
+        title: `Citizen's Voice: ${issue.title}`,
+        text: issue.summary,
+        url: shareUrl,
+    };
+
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+        } catch (err) {
+            console.error("Error sharing:", err);
+        }
+    } else {
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy:", err);
+            alert("Could not copy link to clipboard.");
+        }
+    }
+  };
+
+  const handleReadDescription = () => {
+    if (!issue) return;
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        return;
+    }
+    if ('speechSynthesis' in window) {
+        const textToRead = issue.description;
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utteranceRef.current = utterance;
+        
+        utterance.onboundary = (event) => {
+            setHighlightedDescription(textToRead.substring(0, event.charIndex));
+        };
+        
+        utterance.onend = () => {
+            setIsSpeaking(false);
+            setHighlightedDescription('');
+            utteranceRef.current = null;
+        };
+        
+        utterance.onerror = (event) => {
+            console.error('Speech synthesis error:', event.error);
+            setIsSpeaking(false);
+            setHighlightedDescription('');
+        };
+
+        window.speechSynthesis.speak(utterance);
+        setIsSpeaking(true);
+    } else {
+        alert("Text-to-speech is not supported in your browser.");
+    }
+  };
+
 
   return (
     <>
@@ -111,20 +190,41 @@ const IssueDetailModal: React.FC<IssueDetailModalProps> = ({ issue, onClose, onU
             
             {/* Author */}
             <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-dark">{issue.author.avatar}</div>
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-dark">{displayAuthor.avatar}</div>
               <div>
                 <div className="flex items-center space-x-1">
-                  <p className="font-semibold text-dark">{issue.author.name}</p>
-                  {issue.author.isVerified && <CheckCircleIcon className="w-4 h-4 text-green-500" />}
+                  <p className="font-semibold text-dark">{displayAuthor.name}</p>
+                  {displayAuthor.isVerified && <CheckCircleIcon className="w-4 h-4 text-green-500" />}
                 </div>
-                <p className="text-xs text-gray-500">{issue.author.location}</p>
+                <p className="text-xs text-gray-500">{displayAuthor.location}</p>
               </div>
             </div>
 
+            {/* Share Action */}
+             <div className="pt-4 border-t border-gray-100">
+                <button 
+                    onClick={handleShare}
+                    className={`w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg font-semibold transition-colors duration-200 ${isCopied ? 'bg-green-100 text-success' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                >
+                    <ShareIcon className="w-5 h-5" />
+                    <span>{isCopied ? 'Link Copied!' : 'Share Issue'}</span>
+                </button>
+            </div>
+
+
             {/* Description */}
             <div>
-              <h4 className="font-bold text-dark">Description</h4>
-              <p className="text-gray-700 mt-1">{issue.description}</p>
+              <div className="flex justify-between items-center">
+                <h4 className="font-bold text-dark">Description</h4>
+                <button onClick={handleReadDescription} className="flex items-center space-x-2 text-primary hover:text-secondary font-semibold text-sm">
+                    <SoundIcon className="w-5 h-5" />
+                    <span>{isSpeaking ? 'Stop' : 'Read Aloud'}</span>
+                </button>
+              </div>
+              <p className="text-gray-700 mt-1 whitespace-pre-wrap text-justify">
+                  <span className="bg-primary/20 rounded">{highlightedDescription}</span>
+                  <span>{issue.description.substring(highlightedDescription.length)}</span>
+              </p>
             </div>
 
             {/* Media Gallery */}
