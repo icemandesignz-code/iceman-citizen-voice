@@ -1,19 +1,28 @@
-
 import React from 'react';
-import { SearchIcon, BellIcon } from '../constants';
+import { SearchIcon, BellIcon, ChevronLeftIcon } from '../constants';
+import { User } from '../types';
 
 interface HeaderProps {
+    user: User;
     onProfileClick: () => void;
     onSearchClick: () => void;
+    showBackButton?: boolean;
+    onBack?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onProfileClick, onSearchClick }) => {
+const Header: React.FC<HeaderProps> = ({ user, onProfileClick, onSearchClick, showBackButton, onBack }) => {
   return (
     <header className="bg-white sticky top-0 z-30 shadow-sm p-4 flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <button onClick={onProfileClick} className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
-          R
-        </button>
+        {showBackButton && onBack ? (
+            <button onClick={onBack} className="text-gray-600 hover:text-primary">
+                <ChevronLeftIcon className="w-6 h-6" />
+            </button>
+        ) : (
+            <button onClick={onProfileClick} className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
+              {user.avatar}
+            </button>
+        )}
         <div>
           <h1 className="font-bold text-lg text-dark">Citizen's Voice</h1>
           <p className="text-sm text-gray-500">Guyana</p>

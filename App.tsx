@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Page, Issue, User, IssueStatus, Ministry, District } from './types';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Page, Issue, User, IssueStatus, Ministry, District, IssuePriority } from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import HomePage from './pages/HomePage';
@@ -7,22 +7,28 @@ import MinistriesPage from './pages/MinistriesPage';
 import DistrictsPage from './pages/DistrictsPage';
 import ResourcesPage from './pages/ResourcesPage';
 import EmergencyPage from './pages/EmergencyPage';
+import ProfilePage from './pages/ProfilePage';
 import IssueDetailModal from './components/IssueDetailModal';
-import { MOCK_ISSUES, MOCK_MINISTRIES, MOCK_DISTRICTS } from './constants';
-import ProfileDrawer from './components/ProfileDrawer';
+import { MOCK_ISSUES, MOCK_MINISTRIES, MOCK_DISTRICTS, MOCK_CURRENT_USER } from './constants';
 import SearchModal from './components/SearchModal';
 import ReportIssueModal from './components/ReportIssueModal';
 
-// Mock user for new reports
-const currentUser: User = { id: 'u5', name: 'Ravi Kumar', avatar: 'R', location: 'Georgetown, Region 4', isVerified: true };
-
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
+  const [previousPage, setPreviousPage] = useState<Page>(Page.Home);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
-  const [isProfileOpen, setProfileOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isReportModalOpen, setReportModalOpen] = useState(false);
+  
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
+  const [currentUser, setCurrentUser] = useState<User>(MOCK_CURRENT_USER);
+
+  const navigateTo = (page: Page) => {
+    if (page !== currentPage) {
+      setPreviousPage(currentPage);
+      setCurrentPage(page);
+    }
+  };
 
   const handleSelectIssue = useCallback((issue: Issue) => {
     setSelectedIssue(issue);
@@ -60,12 +66,34 @@ const App: React.FC = () => {
   }, [selectedIssue]);
 
   const handleSelectIssueFromSearch = useCallback((issue: Issue) => {
-    // A small delay to allow the search modal to close before the issue modal opens
     setTimeout(() => {
         handleSelectIssue(issue);
     }, 100);
   }, [handleSelectIssue]);
 
+  const handleUpdateUser = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+
+    // Update user details across all issues and comments for consistency
+    const updatedIssues = issues.map(issue => {
+      const newIssue = { ...issue };
+      // Update author
+      if (newIssue.author.id === updatedUser.id) {
+        newIssue.author = updatedUser;
+      }
+      // Update comments
+      newIssue.comments = newIssue.comments.map(comment => {
+        if (comment.user.id === updatedUser.id) {
+          return { ...comment, user: updatedUser };
+        }
+        return comment;
+      });
+      return newIssue;
+    });
+    setIssues(updatedIssues);
+  };
+
+  const userIssues = useMemo(() => issues.filter(issue => issue.author.id === currentUser.id), [issues, currentUser.id]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -79,24 +107,37 @@ const App: React.FC = () => {
         return <ResourcesPage />;
       case Page.SOS:
         return <EmergencyPage />;
+      case Page.Profile:
+        return <ProfilePage 
+                  user={currentUser} 
+                  userIssues={userIssues}
+                  allIssues={issues}
+                  onUpdateUser={handleUpdateUser}
+                  onSelectIssue={handleSelectIssue}
+                  onBack={() => navigateTo(previousPage)}
+                />;
       default:
         return <HomePage issues={issues} onSelectIssue={handleSelectIssue} onReportIssue={() => setReportModalOpen(true)} />;
     }
   };
+  
+  const isBottomNavVisible = [Page.Home, Page.Ministry, Page.Districts, Page.Resources, Page.SOS].includes(currentPage);
 
   return (
     <div className="min-h-screen font-sans bg-background text-gray-800 flex flex-col max-w-lg mx-auto shadow-2xl relative">
       <Header 
-        onProfileClick={() => setProfileOpen(true)}
+        user={currentUser}
+        onProfileClick={() => navigateTo(Page.Profile)}
         onSearchClick={() => setSearchOpen(true)}
+        showBackButton={!isBottomNavVisible}
+        onBack={() => navigateTo(previousPage)}
       />
-      <main className="flex-grow pb-20 px-4">
+      <main className={`flex-grow px-4 ${isBottomNavVisible ? 'pb-20' : ''}`}>
         {renderPage()}
       </main>
-      <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      {isBottomNavVisible && <BottomNav currentPage={currentPage} setCurrentPage={navigateTo} />}
       
       {selectedIssue && <IssueDetailModal issue={selectedIssue} onClose={handleCloseModal} onUpdateStatus={handleUpdateIssueStatus} />}
-      <ProfileDrawer isOpen={isProfileOpen} onClose={() => setProfileOpen(false)} />
       {isSearchOpen && <SearchModal 
         onClose={() => setSearchOpen(false)}
         issues={issues}

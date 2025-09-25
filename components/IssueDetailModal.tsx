@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Issue, IssueStatus } from '../types';
-import { XIcon, MapPinIcon, CheckCircleIcon, MessageSquareIcon, AudioIcon, VideoIcon, SearchIcon } from '../constants';
+import { Issue, IssueStatus, IssuePriority } from '../types';
+import { XIcon, MapPinIcon, CheckCircleIcon, MessageSquareIcon, AudioIcon, VideoIcon, SearchIcon, AlertTriangleIcon, ZapIcon } from '../constants';
 
 interface IssueDetailModalProps {
   issue: Issue | null;
@@ -15,6 +15,39 @@ const StatusBadge: React.FC<{ status: IssueStatus }> = ({ status }) => {
         [IssueStatus.Resolved]: 'bg-green-100 text-green-800',
     };
     return <span className={`px-3 py-1 text-xs font-bold rounded-full ${colorClasses[status]}`}>{status}</span>
+}
+
+const PriorityBadge: React.FC<{ priority: IssuePriority }> = ({ priority }) => {
+    const priorityConfig = {
+        [IssuePriority.Critical]: {
+            icon: <ZapIcon className="w-4 h-4 mr-1.5" />,
+            text: 'Critical Priority',
+            className: 'bg-red-100 text-red-800',
+        },
+        [IssuePriority.High]: {
+            icon: <AlertTriangleIcon className="w-4 h-4 mr-1.5" />,
+            text: 'High Priority',
+            className: 'bg-orange-100 text-orange-800',
+        },
+        [IssuePriority.Medium]: {
+            icon: null,
+            text: 'Medium Priority',
+            className: 'bg-blue-100 text-blue-800',
+        },
+        [IssuePriority.Low]: {
+            icon: null,
+            text: 'Low Priority',
+            className: 'bg-gray-100 text-gray-800',
+        },
+    }
+    const config = priorityConfig[priority];
+
+    return (
+        <div className={`flex items-center px-3 py-1 text-xs font-bold rounded-full ${config.className}`}>
+            {config.icon}
+            {config.text}
+        </div>
+    )
 }
 
 const IssueDetailModal: React.FC<IssueDetailModalProps> = ({ issue, onClose, onUpdateStatus }) => {
@@ -50,7 +83,10 @@ const IssueDetailModal: React.FC<IssueDetailModalProps> = ({ issue, onClose, onU
             {/* Title and Meta */}
             <div>
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <StatusBadge status={issue.status} />
+                  <div className="flex items-center gap-2">
+                      <StatusBadge status={issue.status} />
+                      <PriorityBadge priority={issue.priority} />
+                  </div>
                   
                   <div className="flex items-center space-x-2">
                       <label htmlFor="status-select" className="text-sm font-medium text-gray-700">Change Status:</label>

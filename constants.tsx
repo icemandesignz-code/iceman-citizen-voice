@@ -1,10 +1,12 @@
-import { Issue, Ministry, District, IssueCategory, IssueStatus, UrgencyLevel, User } from './types';
+import { Issue, Ministry, District, IssueCategory, IssueStatus, IssuePriority, User } from './types';
 import React from 'react';
 
 // Mock Users
 const user1: User = { id: 'u1', name: 'Maria Rodriguez', avatar: 'M', location: 'Georgetown, Region 4', isVerified: true };
 const user2: User = { id: 'u2', name: 'John Doe', avatar: 'J', location: 'Linden, Region 10', isVerified: false };
 const user3: User = { id: 'u3', name: 'Admin', avatar: 'A', location: 'Gov', isVerified: true };
+export const MOCK_CURRENT_USER: User = { id: 'u5', name: 'Ravi Kumar', avatar: 'R', location: 'Georgetown, Region 4', isVerified: true };
+
 
 // Mock Issues
 export const MOCK_ISSUES: Issue[] = [
@@ -18,7 +20,7 @@ export const MOCK_ISSUES: Issue[] = [
     location: 'Georgetown, Region 4',
     timestamp: '2 hours ago',
     status: IssueStatus.Pending,
-    urgency: UrgencyLevel.High,
+    priority: IssuePriority.High,
     media: {
       photos: ['https://picsum.photos/seed/road1/400/300', 'https://picsum.photos/seed/road2/400/300'],
       videos: [],
@@ -39,13 +41,29 @@ export const MOCK_ISSUES: Issue[] = [
     location: 'Linden, Region 10',
     timestamp: '1 day ago',
     status: IssueStatus.Approved,
-    urgency: UrgencyLevel.Medium,
+    priority: IssuePriority.Medium,
     media: {
       photos: ['https://picsum.photos/seed/clinic1/400/300'],
       videos: ['https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'],
       audio: [],
     },
     comments: [],
+  },
+    {
+    id: 'issue-by-user5',
+    title: 'Request for Community Center Wifi',
+    summary: 'The community center lacks public wifi, which would be a great resource for students and residents.',
+    description: 'Our local community center is a hub for many activities, but it lacks a reliable internet connection for public use. Installing wifi would be immensely beneficial for students who need to do research, remote workers, and residents who need to access online services. This would be a great step towards digital inclusion.',
+    author: MOCK_CURRENT_USER,
+    category: IssueCategory.Education,
+    location: 'Georgetown, Region 4',
+    timestamp: '2 days ago',
+    status: IssueStatus.Pending,
+    priority: IssuePriority.Low,
+    media: { photos: [], videos: [], audio: [] },
+    comments: [
+       {id: 'c4', user: user1, text: "This is a fantastic idea! I'd use it all the time.", timestamp: '1 day ago'}
+    ],
   },
   {
     id: '3',
@@ -57,24 +75,25 @@ export const MOCK_ISSUES: Issue[] = [
     location: 'New Amsterdam, Region 6',
     timestamp: '3 days ago',
     status: IssueStatus.Pending,
-    urgency: UrgencyLevel.Medium,
+    priority: IssuePriority.Medium,
     media: { photos: [], videos: [], audio: [] },
     comments: [],
   },
   {
     id: '4',
-    title: 'Streetlight Outage on Main Street',
-    summary: 'Multiple streetlights on the main commercial street have been out for over a week, raising security concerns.',
-    description: 'The lack of functioning streetlights on Main Street has made the area unsafe at night. Local businesses are concerned about security, and residents feel unsafe walking in the dark. This is an urgent issue that needs immediate attention from the infrastructure ministry.',
+    title: 'Streetlight Outage on Main Street Causing Accidents',
+    summary: 'Multiple streetlights on the main commercial street have been out for over a week, raising security concerns and causing accidents.',
+    description: 'The lack of functioning streetlights on Main Street has made the area unsafe at night. Local businesses are concerned about security, and residents feel unsafe walking in the dark. There have been two minor accidents reported in the last 48 hours. This is an urgent issue that needs immediate attention from the infrastructure ministry.',
     author: user1,
     category: IssueCategory.Infrastructure,
     location: 'Georgetown, Region 4',
     timestamp: '5 days ago',
     status: IssueStatus.Resolved,
-    urgency: UrgencyLevel.High,
+    priority: IssuePriority.Critical,
     media: { photos: ['https://picsum.photos/seed/street/400/300'], videos: [], audio: [] },
     comments: [
-        {id: 'c3', user: user3, text: 'Our maintenance crew has fixed the streetlights. Thank you for bringing this to our attention.', timestamp: '1 day ago'}
+        {id: 'c3', user: user3, text: 'Our maintenance crew has fixed the streetlights. Thank you for bringing this to our attention.', timestamp: '1 day ago'},
+        {id: 'comment-by-user5', user: MOCK_CURRENT_USER, text: 'Great work! The street feels much safer now.', timestamp: '20 hours ago'}
     ],
   },
    {
@@ -87,7 +106,7 @@ export const MOCK_ISSUES: Issue[] = [
     location: 'Linden, Region 10',
     timestamp: '6 days ago',
     status: IssueStatus.Pending,
-    urgency: UrgencyLevel.Medium,
+    priority: IssuePriority.Medium,
     media: { photos: ['https://picsum.photos/seed/dumping/400/300'], videos: [], audio: [] },
     comments: [],
   },
@@ -176,4 +195,16 @@ export const FilterIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 export const CrosshairIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+);
+export const ChevronLeftIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="15 18 9 12 15 6"></polyline></svg>
+);
+export const EditIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+);
+export const MicIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+);
+export const ZapIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
 );

@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 
 export enum Page {
   Home = 'Home',
@@ -5,6 +6,7 @@ export enum Page {
   Districts = 'Districts',
   Resources = 'Resources',
   SOS = 'SOS',
+  Profile = 'Profile',
 }
 
 export enum IssueCategory {
@@ -21,10 +23,11 @@ export enum IssueStatus {
   Resolved = 'Resolved',
 }
 
-export enum UrgencyLevel {
+export enum IssuePriority {
     Low = 'Low',
     Medium = 'Medium',
-    High = 'High'
+    High = 'High',
+    Critical = 'Critical'
 }
 
 export interface User {
@@ -52,7 +55,7 @@ export interface Issue {
   location: string;
   timestamp: string;
   status: IssueStatus;
-  urgency: UrgencyLevel;
+  priority: IssuePriority;
   media: {
     photos: string[];
     videos: string[];

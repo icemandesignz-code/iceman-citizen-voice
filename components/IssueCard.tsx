@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { Issue, UrgencyLevel } from '../types';
-import { MapPinIcon, CheckCircleIcon, AlertTriangleIcon, SoundIcon, PhotoIcon, VideoIcon, AudioIcon } from '../constants';
+import { Issue, IssuePriority } from '../types';
+import { MapPinIcon, CheckCircleIcon, AlertTriangleIcon, SoundIcon, PhotoIcon, VideoIcon, AudioIcon, ZapIcon } from '../constants';
 
 interface IssueCardProps {
   issue: Issue;
@@ -16,12 +15,39 @@ const MediaIndicator: React.FC<{ issue: Issue }> = ({ issue }) => (
     </div>
 );
 
-const UrgencyIndicator: React.FC<{ level: UrgencyLevel }> = ({ level }) => {
-    if (level === UrgencyLevel.High) {
-        return <AlertTriangleIcon className="w-6 h-6 text-danger" />;
-    }
-    return null;
-}
+const PriorityIndicator: React.FC<{ level: IssuePriority }> = ({ level }) => {
+    const priorityStyles = {
+        [IssuePriority.Critical]: {
+            icon: <ZapIcon className="w-4 h-4" />,
+            text: 'Critical',
+            className: 'text-red-600 font-bold',
+        },
+        [IssuePriority.High]: {
+            icon: <AlertTriangleIcon className="w-4 h-4" />,
+            text: 'High',
+            className: 'text-orange-500 font-semibold',
+        },
+        [IssuePriority.Medium]: {
+            icon: null,
+            text: 'Medium',
+            className: 'text-blue-500 font-semibold',
+        },
+        [IssuePriority.Low]: {
+            icon: null,
+            text: 'Low',
+            className: 'text-gray-500 font-semibold',
+        },
+    };
+
+    const style = priorityStyles[level];
+
+    return (
+        <div className={`flex items-center space-x-1 text-sm ${style.className}`}>
+            {style.icon}
+            <span>{style.text}</span>
+        </div>
+    );
+};
 
 const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
   const handleRead = (e: React.MouseEvent) => {
@@ -59,7 +85,6 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
             <span className={`px-3 py-1 text-xs font-semibold rounded-full text-white bg-primary`}>
               {issue.category}
             </span>
-            <UrgencyIndicator level={issue.urgency} />
         </div>
       </div>
 
@@ -69,7 +94,10 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
       </div>
 
       <div className="mt-4 flex justify-between items-center">
-        <MediaIndicator issue={issue} />
+        <div className="flex items-center space-x-4">
+          <MediaIndicator issue={issue} />
+          <PriorityIndicator level={issue.priority} />
+        </div>
         <button onClick={handleRead} className="flex items-center space-x-2 text-primary hover:text-secondary font-semibold text-sm">
           <SoundIcon className="w-5 h-5" />
           <span>Read</span>
