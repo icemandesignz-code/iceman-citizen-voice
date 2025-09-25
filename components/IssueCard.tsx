@@ -8,22 +8,22 @@ const PriorityIndicator: React.FC<{ level: IssuePriority }> = ({ level }) => {
         [IssuePriority.Critical]: {
             icon: <ZapIcon className="w-4 h-4" />,
             text: 'Critical',
-            className: 'text-red-600 font-bold',
+            className: 'text-red-600 dark:text-red-400 font-bold',
         },
         [IssuePriority.High]: {
             icon: <AlertTriangleIcon className="w-4 h-4" />,
             text: 'High',
-            className: 'text-orange-500 font-semibold',
+            className: 'text-orange-500 dark:text-orange-400 font-semibold',
         },
         [IssuePriority.Medium]: {
             icon: null,
             text: 'Medium',
-            className: 'text-blue-500 font-semibold',
+            className: 'text-blue-500 dark:text-blue-400 font-semibold',
         },
         [IssuePriority.Low]: {
             icon: null,
             text: 'Low',
-            className: 'text-gray-500 font-semibold',
+            className: 'text-gray-500 dark:text-gray-400 font-semibold',
         },
     };
 
@@ -40,7 +40,7 @@ const PriorityIndicator: React.FC<{ level: IssuePriority }> = ({ level }) => {
 // Component for a single media item in the collage
 const MediaItem: React.FC<{ type: 'photo' | 'video', url: string, isOverlay?: boolean, remainingCount?: number }> = ({ type, url, isOverlay, remainingCount }) => {
   return (
-    <div className="relative w-full h-full bg-gray-200" onClick={e => e.stopPropagation()}>
+    <div className="relative w-full h-full bg-gray-200 dark:bg-gray-700" onClick={e => e.stopPropagation()}>
       {type === 'video' ? (
         <>
           <video src={url} className="w-full h-full object-cover" muted playsInline loop />
@@ -71,7 +71,7 @@ const MediaCollage: React.FC<{ media: Issue['media'] }> = ({ media }) => {
 
     const displayMedia = allMedia.slice(0, 4);
     const remainingCount = allMedia.length - displayMedia.length;
-    const baseClasses = "mt-3 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group";
+    const baseClasses = "mt-3 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 dark:border-gray-700 group";
 
     if (displayMedia.length === 1) {
         return (
@@ -190,18 +190,18 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
   const hasAudio = issue.media.audio && issue.media.audio.length > 0;
 
   return (
-    <div onClick={() => onSelectIssue(issue)} className="bg-white p-4 rounded-xl shadow-md border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow">
+    <div onClick={() => onSelectIssue(issue)} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-dark">
+          <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center font-bold text-dark dark:text-white">
             {displayAuthor.avatar}
           </div>
           <div>
             <div className="flex items-center space-x-1">
-              <p className="font-semibold text-dark">{displayAuthor.name}</p>
-              {displayAuthor.isVerified && <CheckCircleIcon className="w-4 h-4 text-green-500" />}
+              <p className="font-semibold text-dark dark:text-white">{displayAuthor.name}</p>
+              {displayAuthor.isVerified && <CheckCircleIcon className="w-4 h-4 text-green-500 dark:text-green-400" />}
             </div>
-            <div className="flex items-center text-xs text-gray-500 space-x-2">
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-2">
               <div className="flex items-center">
                 <MapPinIcon className="w-3 h-3 mr-1" />
                 <span>{displayAuthor.location}</span>
@@ -218,11 +218,11 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
       </div>
 
       <div className="mt-4">
-        <h4 className="text-lg font-bold text-dark">
+        <h4 className="text-lg font-bold text-dark dark:text-white">
             <span className="bg-primary/20 rounded">{highlightedText.title}</span>
             <span>{issue.title.substring(highlightedText.title.length)}</span>
         </h4>
-        <p className="text-gray-600 mt-1 text-sm whitespace-pre-wrap">
+        <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm whitespace-pre-wrap text-justify">
             <span className="bg-primary/20 rounded">{highlightedText.summary}</span>
             <span>{(isExpanded ? issue.summary : displaySummary).substring(highlightedText.summary.length)}</span>
         </p>
@@ -245,7 +245,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
         <PriorityIndicator level={issue.priority} />
         <div className="flex items-center space-x-4">
            {hasAudio && (
-             <div className="flex items-center space-x-1 text-gray-500" title="This report contains audio">
+             <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400" title="This report contains audio">
                 <IndicatorAudioIcon className="w-5 h-5" />
              </div>
           )}

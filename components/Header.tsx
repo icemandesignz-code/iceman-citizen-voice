@@ -12,10 +12,10 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, onProfileClick, onSearchClick, showBackButton, onBack }) => {
   return (
-    <header className="bg-white sticky top-0 z-30 shadow-sm p-4 flex items-center justify-between">
+    <header className="bg-white dark:bg-gray-800 sticky top-0 z-30 shadow-sm p-4 flex items-center justify-between dark:border-b dark:border-gray-700">
       <div className="flex items-center space-x-3">
         {showBackButton && onBack ? (
-            <button onClick={onBack} className="text-gray-600 hover:text-primary">
+            <button onClick={onBack} className="text-gray-600 dark:text-gray-300 hover:text-primary">
                 <ChevronLeftIcon className="w-6 h-6" />
             </button>
         ) : (
@@ -24,15 +24,15 @@ const Header: React.FC<HeaderProps> = ({ user, onProfileClick, onSearchClick, sh
             </button>
         )}
         <div>
-          <h1 className="font-bold text-lg text-dark">Citizen's Voice</h1>
-          <p className="text-sm text-gray-500">Guyana</p>
+          <h1 className="font-bold text-lg text-dark dark:text-white">Citizen's Voice</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Guyana</p>
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <button onClick={onSearchClick} className="text-gray-600 hover:text-primary">
+        <button onClick={onSearchClick} className="text-gray-600 dark:text-gray-300 hover:text-primary">
           <SearchIcon className="w-6 h-6" />
         </button>
-        <button className="relative text-gray-600 hover:text-primary">
+        <button className="relative text-gray-600 dark:text-gray-300 hover:text-primary">
           <BellIcon className="w-6 h-6" />
           <span className="absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
         </button>

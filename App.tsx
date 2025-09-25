@@ -15,6 +15,7 @@ import ReportIssueModal from './components/ReportIssueModal';
 import ProfileDrawer from './components/ProfileDrawer';
 import ResourcesPage from './pages/ResourcesPage';
 import CommunitiesPage from './pages/CommunitiesPage';
+import SettingsPage from './pages/SettingsPage';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
@@ -23,9 +24,27 @@ const App: React.FC = () => {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isReportModalOpen, setReportModalOpen] = useState(false);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
   
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
   const [currentUser, setCurrentUser] = useState<User>(MOCK_CURRENT_USER);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -138,6 +157,8 @@ const App: React.FC = () => {
         return <MapPage issues={issues} onSelectIssue={handleSelectIssue} />;
       case Page.Communities:
         return <CommunitiesPage />;
+      case Page.Settings:
+        return <SettingsPage isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} />;
       default:
         return <HomePage issues={issues} onSelectIssue={handleSelectIssue} onReportIssue={() => setReportModalOpen(true)} />;
     }
@@ -146,7 +167,7 @@ const App: React.FC = () => {
   const isBottomNavVisible = [Page.Home, Page.Ministry, Page.Districts, Page.Resources, Page.SOS].includes(currentPage);
 
   return (
-    <div className="min-h-screen font-sans bg-background text-gray-800 flex flex-col max-w-lg mx-auto shadow-2xl relative">
+    <div className="min-h-screen font-sans bg-background text-gray-800 flex flex-col max-w-lg mx-auto shadow-2xl relative dark:bg-gray-900 dark:text-gray-200">
       <ProfileDrawer 
         isOpen={isDrawerOpen} 
         onClose={() => setDrawerOpen(false)} 

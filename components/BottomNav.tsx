@@ -22,15 +22,15 @@ const NavItem: React.FC<{
   onClick: () => void;
 }> = ({ item, isActive, onClick }) => {
   const activeClasses = 'bg-light text-primary';
-  const inactiveClasses = 'text-gray-500';
+  const inactiveClasses = 'text-gray-500 dark:text-gray-400';
 
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center space-y-1 w-1/5 p-2 rounded-lg transition-colors duration-200 ${isActive ? '' : 'hover:bg-gray-100'}`}
+      className={`flex flex-col items-center justify-center space-y-1 w-1/5 p-2 rounded-lg transition-colors duration-200 ${isActive ? '' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
     >
       <div className={`p-3 rounded-full transition-colors duration-200 ${isActive ? activeClasses : ''}`}>
-        <item.icon className={`w-6 h-6 ${isActive ? 'text-primary' : 'text-gray-500'}`} />
+        <item.icon className={`w-6 h-6 ${isActive ? 'text-primary' : 'text-gray-500 dark:text-gray-300'}`} />
       </div>
       <span className={`text-xs font-medium ${isActive ? 'text-primary' : inactiveClasses}`}>
         {item.label}
@@ -42,7 +42,7 @@ const NavItem: React.FC<{
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentPage, setCurrentPage }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] flex justify-around items-center p-2 max-w-lg mx-auto z-40 border-t border-gray-200">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] flex justify-around items-center p-2 max-w-lg mx-auto z-40 border-t border-gray-200 dark:border-gray-700">
       {navItems.map((item) => (
         <NavItem
           key={item.page}

@@ -393,35 +393,35 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-t-2xl absolute bottom-0 max-h-[95vh] w-full max-w-lg flex flex-col animate-slide-up">
-        <header className="p-4 border-b flex items-center justify-between sticky top-0 bg-white rounded-t-2xl">
-          <h2 className="text-lg font-bold text-dark">Report a New Issue</h2>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
-            <XIcon className="w-6 h-6 text-gray-600" />
+      <div className="bg-white dark:bg-gray-800 rounded-t-2xl absolute bottom-0 max-h-[95vh] w-full max-w-lg flex flex-col animate-slide-up">
+        <header className="p-4 border-b dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 rounded-t-2xl">
+          <h2 className="text-lg font-bold text-dark dark:text-white">Report a New Issue</h2>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <XIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           </button>
         </header>
 
         <form onSubmit={handleSubmit} className="overflow-y-auto p-4 space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="e.g., Pothole on Main Street" />
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+            <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="e.g., Pothole on Main Street" />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
              <div className="relative mt-1">
                 <textarea 
                     id="description" 
                     value={description} 
                     onChange={(e) => setDescription(e.target.value)} 
                     rows={4} 
-                    className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10" 
+                    className="block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10" 
                     placeholder="Provide details or use the mic to dictate."
                 />
                 <button
                     type="button"
                     onClick={handleToggleRecording}
-                    className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${isRecording ? 'bg-red-100 text-danger' : 'text-gray-500 hover:text-primary hover:bg-gray-100'}`}
+                    className={`absolute top-2 right-2 p-1 rounded-full transition-colors ${isRecording ? 'bg-red-100 text-danger' : 'text-gray-500 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600'}`}
                     aria-label={isRecording ? 'Stop recording' : 'Start recording'}
                 >
                     <MicIcon className="w-5 h-5" />
@@ -432,30 +432,30 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
                 type="button"
                 onClick={handleGenerateSummary}
                 disabled={isGeneratingSummary || !description.trim()}
-                className="mt-2 flex items-center justify-center space-x-2 w-full border border-primary text-primary font-semibold py-2 px-4 rounded-lg hover:bg-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="mt-2 flex items-center justify-center space-x-2 w-full border border-primary text-primary font-semibold py-2 px-4 rounded-lg hover:bg-light dark:hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                 <MagicIcon className={`w-5 h-5 ${isGeneratingSummary ? 'animate-pulse' : ''}`} />
                 <span>{isGeneratingSummary ? 'Generating Summary...' : 'Generate Summary with AI'}</span>
             </button>
             {generatedSummary && (
                 <div className="mt-3">
-                    <label className="block text-sm font-medium text-gray-500">Suggested Summary:</label>
-                    <p className="mt-1 p-3 bg-gray-100 rounded-md text-sm text-gray-800 border border-gray-200 text-justify">{generatedSummary}</p>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Suggested Summary:</label>
+                    <p className="mt-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-md text-sm text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600 text-justify">{generatedSummary}</p>
                 </div>
             )}
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-              <select id="category" value={category} onChange={(e) => setCategory(e.target.value as IssueCategory)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+              <select id="category" value={category} onChange={(e) => setCategory(e.target.value as IssueCategory)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
                 {Object.values(IssueCategory).map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
             </div>
              <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700">Priority</label>
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
                 <div className="relative mt-1">
-                    <select id="priority" value={priority} onChange={(e) => setPriority(e.target.value as IssuePriority)} className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                    <select id="priority" value={priority} onChange={(e) => setPriority(e.target.value as IssuePriority)} className="block w-full pl-3 pr-10 py-2 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
                         {Object.values(IssuePriority).map(level => <option key={level} value={level}>{level}</option>)}
                     </select>
                      <button
@@ -473,13 +473,13 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
             {isMapView ? (
                 <div className="mt-2">
-                    <div ref={mapContainerRef} className="h-64 w-full rounded-lg z-0 border"></div>
-                    {isGeocoding && <p className="text-sm text-gray-500 mt-2 animate-pulse">Fetching address...</p>}
+                    <div ref={mapContainerRef} className="h-64 w-full rounded-lg z-0 border dark:border-gray-600"></div>
+                    {isGeocoding && <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 animate-pulse">Fetching address...</p>}
                     <div className="flex justify-end space-x-2 mt-2">
-                        <button type="button" onClick={() => setIsMapView(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                        <button type="button" onClick={() => setIsMapView(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">Cancel</button>
                         <button type="button" onClick={handleConfirmLocation} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-secondary disabled:opacity-50" disabled={!tempCoords || isGeocoding}>
                           {isGeocoding ? 'Locating...' : 'Confirm Location'}
                         </button>
@@ -495,15 +495,15 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
                             setLocation(e.target.value);
                             setCoordinates(null);
                         }}
-                        className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                        className="block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                         placeholder={isFetchingLocation ? "Getting current location..." : "Type an address or use buttons"}
                     />
                     <div className="flex space-x-2 mt-2 text-sm">
-                        <button type="button" onClick={handleGetLocation} disabled={isFetchingLocation} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 py-2 rounded-md hover:bg-gray-50 disabled:opacity-50">
+                        <button type="button" onClick={handleGetLocation} disabled={isFetchingLocation} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 dark:border-gray-600 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:opacity-50">
                             <CrosshairIcon className="w-4 h-4" />
                             <span>Current Location</span>
                         </button>
-                        <button type="button" onClick={() => setIsMapView(true)} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 py-2 rounded-md hover:bg-gray-50">
+                        <button type="button" onClick={() => setIsMapView(true)} className="flex-1 flex items-center justify-center space-x-2 border border-gray-300 dark:border-gray-600 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <MapPinIcon className="w-4 h-4" />
                             <span>Select on Map</span>
                         </button>
@@ -520,32 +520,32 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
                 type="checkbox"
                 checked={isAnonymous}
                 onChange={(e) => setIsAnonymous(e.target.checked)}
-                className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded"
+                className="focus:ring-primary h-4 w-4 text-primary border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700"
               />
             </div>
             <div className="ml-3 text-sm">
-              <label htmlFor="anonymous" className="font-medium text-gray-700">
+              <label htmlFor="anonymous" className="font-medium text-gray-700 dark:text-gray-300">
                 Report Anonymously
               </label>
-              <p className="text-gray-500 text-justify">Your identity will be hidden from the public if you check this box.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-justify">Your identity will be hidden from the public if you check this box.</p>
             </div>
           </div>
 
           <div>
-             <label className="block text-sm font-medium text-gray-700 mb-2">Add Media (Optional)</label>
+             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Add Media (Optional)</label>
              <input type="file" accept="image/*" multiple ref={photoInputRef} onChange={handlePhotoChange} className="hidden" />
              <input type="file" accept="video/*" ref={videoInputRef} onChange={handleVideoChange} className="hidden" />
              <input type="file" accept="audio/*" ref={audioInputRef} onChange={handleAudioChange} className="hidden" />
              <div className="flex space-x-2">
-                <button type="button" onClick={() => photoInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 text-gray-500 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={() => photoInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <CameraIcon className="w-5 h-5" />
                     <span>Photo(s)</span>
                 </button>
-                <button type="button" onClick={() => videoInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 text-gray-500 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={() => videoInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <VideoIcon className="w-5 h-5" />
                     <span>Video</span>
                 </button>
-                <button type="button" onClick={() => audioInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 text-gray-500 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50">
+                <button type="button" onClick={() => audioInputRef.current?.click()} className="flex-1 flex items-center justify-center space-x-2 border-2 border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <AudioIcon className="w-5 h-5" />
                     <span>Audio</span>
                 </button>
@@ -553,7 +553,7 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
               <div className="mt-4 space-y-4">
                 {photos.length > 0 && (
                     <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Photo Previews</h4>
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo Previews</h4>
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             {photos.map((photo, index) => (
                                 <div key={index} className="relative group">
@@ -574,16 +574,16 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
                 {videoPreviewUrl && (
                      <div>
                         <div className="flex items-center justify-between mb-2">
-                           <h4 className="text-sm font-medium text-gray-700">Video Preview</h4>
+                           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Video Preview</h4>
                            <button type="button" onClick={clearVideo} className="text-xs text-red-600 hover:underline">Remove</button>
                         </div>
-                        <video src={videoPreviewUrl} controls className="w-full rounded-md bg-gray-100"></video>
+                        <video src={videoPreviewUrl} controls className="w-full rounded-md bg-gray-100 dark:bg-gray-900"></video>
                     </div>
                 )}
                 {audioPreviewUrl && (
                      <div>
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-medium text-gray-700">Audio Preview</h4>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Audio Preview</h4>
                              <button type="button" onClick={clearAudio} className="text-xs text-red-600 hover:underline">Remove</button>
                         </div>
                         <audio src={audioPreviewUrl} controls className="w-full"></audio>
@@ -594,7 +594,7 @@ const ReportIssueModal: React.FC<ReportIssueModalProps> = ({ isOpen, onClose, on
           {error && <p className="text-sm text-red-600">{error}</p>}
         </form>
         
-        <footer className="p-4 border-t sticky bottom-0 bg-white">
+        <footer className="p-4 border-t dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
           <button onClick={handleSubmit} className="w-full bg-primary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-secondary transition-colors">
               Submit Report
           </button>

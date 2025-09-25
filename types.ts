@@ -9,6 +9,7 @@ export enum Page {
   Profile = 'Profile',
   Map = 'Map',
   Communities = 'Communities',
+  Settings = 'Settings',
 }
 
 export enum IssueCategory {
