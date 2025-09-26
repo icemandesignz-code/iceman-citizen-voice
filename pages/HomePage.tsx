@@ -28,7 +28,7 @@ const HomePage: React.FC<HomePageProps> = ({ issues, onSelectIssue, onReportIssu
   return (
     <div className="space-y-4">
       <div className="bg-gradient-to-br from-primary to-secondary text-white p-6 rounded-2xl shadow-lg">
-        <h2 className="text-3xl font-bold">Your Voice, Your Community</h2>
+        <h2 className="text-3xl font-bold">Your Voice, Your Country</h2>
         <p className="mt-2 text-blue-100 text-justify">Report issues, track progress, build a stronger Guyana together</p>
         <button onClick={onReportIssue} className="mt-4 bg-accent text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-orange-600 transition-colors w-full">
           Report an Issue

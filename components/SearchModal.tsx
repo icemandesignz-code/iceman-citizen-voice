@@ -40,7 +40,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ onClose, issues, ministries, 
     };
     
     const handleCategoryToggle = (category: IssueCategory) => {
-        // FIX: The variable 'c' was undefined here. It should be 'category'.
         setSelectedCategories(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]);
     };
 
@@ -106,12 +105,23 @@ const SearchModal: React.FC<SearchModalProps> = ({ onClose, issues, ministries, 
         switch (item.resultType) {
             case 'issue':
                 const issue = item as Issue;
+                const hasPhoto = issue.media.photos && issue.media.photos.length > 0;
                 return (
-                     <div key={`issue-${issue.id}`} onClick={() => { onSelectIssue(issue); onClose(); }} className="p-3 my-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors flex items-start space-x-3">
-                        <FileTextIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-1 flex-shrink-0" />
+                     <div key={`issue-${issue.id}`} onClick={() => { onSelectIssue(issue); onClose(); }} className="p-3 my-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors flex items-center space-x-3">
+                        {hasPhoto ? (
+                            <img 
+                                src={issue.media.photos[0]} 
+                                alt={issue.title} 
+                                className="w-10 h-10 object-cover rounded-md flex-shrink-0 bg-gray-200 dark:bg-gray-600" 
+                            />
+                        ) : (
+                            <div className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-gray-700/50 rounded-md flex-shrink-0">
+                                <FileTextIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            </div>
+                        )}
                         <div>
-                            <p className="font-semibold text-dark dark:text-white leading-tight">{issue.title}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{issue.category} &bull; {issue.status}</p>
+                            <p className="font-semibold text-dark dark:text-white leading-tight line-clamp-2">{issue.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{issue.category} &bull; {issue.status}</p>
                         </div>
                     </div>
                 )
@@ -243,6 +253,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ onClose, issues, ministries, 
                     display: -webkit-box;
                     -webkit-box-orient: vertical;
                     -webkit-line-clamp: 1;
+                }
+                .line-clamp-2 {
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
                 }
              `}</style>
         </div>

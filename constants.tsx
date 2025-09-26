@@ -128,10 +128,16 @@ export const MOCK_MINISTRIES: Ministry[] = [
 ];
 
 export const MOCK_DISTRICTS: District[] = [
-    { id: 'd1', name: 'Georgetown', region: 'Region 4 (Demerara-Mahaica)', population: 118363, issuesReported: 320, issuesResolved: 250 },
-    { id: 'd2', name: 'Linden', region: 'Region 10 (Upper Demerara-Berbice)', population: 27277, issuesReported: 150, issuesResolved: 110 },
-    { id: 'd3', name: 'New Amsterdam', region: 'Region 6 (East Berbice-Corentyne)', population: 17329, issuesReported: 95, issuesResolved: 80 },
-    { id: 'd4', name: 'Bartica', region: 'Region 7 (Cuyuni-Mazaruni)', population: 15342, issuesReported: 60, issuesResolved: 45 },
+    { id: 'd1', name: 'Barima-Waini', region: 'Region 1', population: 27643, issuesReported: 45, issuesResolved: 30 },
+    { id: 'd2', name: 'Pomeroon-Supenaam', region: 'Region 2', population: 46810, issuesReported: 60, issuesResolved: 48 },
+    { id: 'd3', name: 'Essequibo Islands-West Demerara', region: 'Region 3', population: 107785, issuesReported: 180, issuesResolved: 155 },
+    { id: 'd4', name: 'Demerara-Mahaica', region: 'Region 4', population: 311563, issuesReported: 320, issuesResolved: 250 },
+    { id: 'd5', name: 'Mahaica-Berbice', region: 'Region 5', population: 49820, issuesReported: 75, issuesResolved: 60 },
+    { id: 'd6', name: 'East Berbice-Corentyne', region: 'Region 6', population: 109672, issuesReported: 95, issuesResolved: 80 },
+    { id: 'd7', name: 'Cuyuni-Mazaruni', region: 'Region 7', population: 18375, issuesReported: 60, issuesResolved: 45 },
+    { id: 'd8', name: 'Potaro-Siparuni', region: 'Region 8', population: 11077, issuesReported: 35, issuesResolved: 25 },
+    { id: 'd9', name: 'Upper Takutu-Upper Essequibo', region: 'Region 9', population: 24238, issuesReported: 40, issuesResolved: 32 },
+    { id: 'd10', name: 'Upper Demerara-Berbice', region: 'Region 10', population: 39992, issuesReported: 150, issuesResolved: 110 },
 ];
 
 // Icons
