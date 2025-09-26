@@ -36,7 +36,8 @@ export enum IssuePriority {
 export interface User {
   id: string;
   name: string;
-  avatar: string;
+  avatar: string; // The initial
+  avatarUrl?: string; // Optional URL for the profile picture
   location: string;
   isVerified: boolean;
 }
@@ -88,4 +89,11 @@ export interface District {
     population: number;
     issuesReported: number;
     issuesResolved: number;
+}
+
+export interface HeroContent {
+  title: string;
+  subtitle: string;
+  type: 'gradient' | 'image' | 'video';
+  url: string | null;
 }

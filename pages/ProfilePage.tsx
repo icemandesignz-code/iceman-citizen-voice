@@ -32,14 +32,13 @@ interface ProfilePageProps {
     user: User;
     userIssues: Issue[];
     allIssues: Issue[];
-    onUpdateUser: (user: User) => void;
     onSelectIssue: (issue: Issue) => void;
     onBack: () => void;
+    onEditProfile: () => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ user, userIssues, allIssues, onUpdateUser, onSelectIssue }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ user, userIssues, allIssues, onSelectIssue, onBack, onEditProfile }) => {
     const [activeTab, setActiveTab] = useState<'reports' | 'comments'>('reports');
-    const [isEditModalOpen, setEditModalOpen] = useState(false);
 
     const userComments = useMemo(() => {
         const comments: CommentWithIssue[] = [];
@@ -55,25 +54,22 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, userIssues, allIssues, 
     
     return (
         <div className="space-y-4">
-            {isEditModalOpen && (
-                <EditProfileModal 
-                    user={user} 
-                    onClose={() => setEditModalOpen(false)} 
-                    onSave={onUpdateUser}
-                />
-            )}
             
             {/* Profile Header */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center relative">
                 <button 
-                    onClick={() => setEditModalOpen(true)} 
+                    onClick={onEditProfile} 
                     className="absolute top-3 right-3 p-2 text-gray-500 hover:text-primary hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-full"
                     aria-label="Edit profile"
                 >
                     <EditIcon className="w-5 h-5" />
                 </button>
-                <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white font-bold text-4xl mb-3">
-                    {user.avatar}
+                <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white font-bold text-4xl mb-3 overflow-hidden">
+                   {user.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                        user.avatar
+                    )}
                 </div>
                 <h2 className="text-2xl font-bold text-dark dark:text-white">{user.name}</h2>
                 <div className="flex items-center text-gray-500 dark:text-gray-400 mt-1">

@@ -1,16 +1,17 @@
 import React from 'react';
-import { SearchIcon, BellIcon, ChevronLeftIcon } from '../constants';
+import { SearchIcon, BellIcon, ChevronLeftIcon, UserIcon } from '../constants';
 import { User } from '../types';
 
 interface HeaderProps {
-    user: User;
-    onProfileClick: () => void;
+    user: User | null;
+    onAvatarClick: () => void;
+    onLoginClick: () => void;
     onSearchClick: () => void;
     showBackButton?: boolean;
     onBack?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onProfileClick, onSearchClick, showBackButton, onBack }) => {
+const Header: React.FC<HeaderProps> = ({ user, onAvatarClick, onLoginClick, onSearchClick, showBackButton, onBack }) => {
   return (
     <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-30 p-4 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-700/50">
       <div className="flex items-center space-x-3">
@@ -19,9 +20,19 @@ const Header: React.FC<HeaderProps> = ({ user, onProfileClick, onSearchClick, sh
                 <ChevronLeftIcon className="w-6 h-6" />
             </button>
         ) : (
-            <button onClick={onProfileClick} className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
-              {user.avatar}
-            </button>
+            user ? (
+                <button onClick={onAvatarClick} className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg overflow-hidden ring-2 ring-offset-1 ring-light dark:ring-offset-gray-800">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    user.avatar
+                  )}
+                </button>
+            ) : (
+                <button onClick={onLoginClick} className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300">
+                  <UserIcon className="w-6 h-6" />
+                </button>
+            )
         )}
         <div>
           <h1 className="font-bold text-xl text-dark dark:text-white leading-tight">Citizen's Voice</h1>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { Page, Issue, User, IssueStatus, Ministry, District } from './types';
+import { Page, Issue, User, IssueStatus, HeroContent } from './types';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import HomePage from './pages/HomePage';
@@ -9,27 +9,42 @@ import MapPage from './pages/MapPage';
 import EmergencyPage from './pages/EmergencyPage';
 import ProfilePage from './pages/ProfilePage';
 import IssueDetailModal from './components/IssueDetailModal';
-import { MOCK_ISSUES, MOCK_MINISTRIES, MOCK_DISTRICTS, MOCK_CURRENT_USER } from './constants';
+import { MOCK_ISSUES, MOCK_MINISTRIES, MOCK_DISTRICTS, ANONYMOUS_USER } from './constants';
 import SearchModal from './components/SearchModal';
 import ReportIssueModal from './components/ReportIssueModal';
 import ProfileDrawer from './components/ProfileDrawer';
 import ResourcesPage from './pages/ResourcesPage';
 import CommunitiesPage from './pages/CommunitiesPage';
 import SettingsPage from './pages/SettingsPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginModal from './components/LoginModal';
+import EditProfileModal from './components/EditProfileModal';
+import EditHeroModal from './components/EditHeroModal';
 
-const App: React.FC = () => {
+const CitizenVoiceApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
   const [previousPage, setPreviousPage] = useState<Page>(Page.Home);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [isReportModalOpen, setReportModalOpen] = useState(false);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isEditHeroModalOpen, setEditHeroModalOpen] = useState(false);
+  
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
   
   const [issues, setIssues] = useState<Issue[]>(MOCK_ISSUES);
-  const [currentUser, setCurrentUser] = useState<User>(MOCK_CURRENT_USER);
+  const [heroContent, setHeroContent] = useState<HeroContent>({
+    title: 'Your Voice, Your Community',
+    subtitle: 'Report issues, track progress, build a stronger Guyana together',
+    type: 'gradient',
+    url: null,
+  });
+
+  const { user, isAuthenticated, logout, updateUser, isAdmin } = useAuth();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -45,6 +60,19 @@ const App: React.FC = () => {
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
+  
+  const requireAuth = (action: () => void) => {
+    if (isAuthenticated) {
+      action();
+    } else {
+      setLoginModalOpen(true);
+    }
+  };
+  
+  const handleEditProfile = () => {
+    setDrawerOpen(false); // Close drawer if open
+    setEditModalOpen(true);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -53,18 +81,24 @@ const App: React.FC = () => {
       const issueToOpen = issues.find(issue => issue.id === issueId);
       if (issueToOpen) {
         setSelectedIssue(issueToOpen);
-        // Optional: Clean up the URL to prevent re-opening on refresh
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
   }, [issues]);
 
   const navigateTo = (page: Page) => {
-    if (page !== currentPage) {
+    if (page === Page.Profile && !isAuthenticated) {
+        requireAuth(() => {
+            if (page !== currentPage) {
+                setPreviousPage(currentPage);
+                setCurrentPage(page);
+            }
+        });
+    } else if (page !== currentPage) {
       setPreviousPage(currentPage);
       setCurrentPage(page);
     }
-    setDrawerOpen(false); // Close drawer on any navigation
+    setDrawerOpen(false);
   };
 
   const handleSelectIssue = useCallback((issue: Issue) => {
@@ -79,7 +113,7 @@ const App: React.FC = () => {
     const newIssue: Issue = {
       ...newIssueData,
       id: new Date().toISOString(),
-      author: newIssueData.isAnonymous ? MOCK_CURRENT_USER : currentUser,
+      author: newIssueData.isAnonymous ? ANONYMOUS_USER : user!,
       timestamp: 'Just now',
       status: IssueStatus.Pending,
       comments: [],
@@ -88,17 +122,14 @@ const App: React.FC = () => {
     setReportModalOpen(false);
   };
   
-  const handleUpdateIssueStatus = useCallback((issueId: string, newStatus: IssueStatus) => {
-    setIssues(prevIssues => 
+  const handleUpdateIssue = useCallback((updatedIssue: Issue) => {
+     setIssues(prevIssues => 
         prevIssues.map(issue => 
-            issue.id === issueId ? { ...issue, status: newStatus } : issue
+            issue.id === updatedIssue.id ? updatedIssue : issue
         )
     );
-
-    if (selectedIssue && selectedIssue.id === issueId) {
-        setSelectedIssue(prevSelected => 
-            prevSelected ? { ...prevSelected, status: newStatus } : null
-        );
+     if (selectedIssue && selectedIssue.id === updatedIssue.id) {
+        setSelectedIssue(updatedIssue);
     }
   }, [selectedIssue]);
 
@@ -108,34 +139,21 @@ const App: React.FC = () => {
     }, 100);
   }, [handleSelectIssue]);
 
-  const handleUpdateUser = (updatedUser: User) => {
-    setCurrentUser(updatedUser);
-
-    // Update user details across all issues and comments for consistency
-    const updatedIssues = issues.map(issue => {
-      const newIssue = { ...issue };
-      // Update author
-      if (newIssue.author.id === updatedUser.id) {
-        newIssue.author = updatedUser;
-      }
-      // Update comments
-      newIssue.comments = newIssue.comments.map(comment => {
-        if (comment.user.id === updatedUser.id) {
-          return { ...comment, user: updatedUser };
-        }
-        return comment;
-      });
-      return newIssue;
-    });
-    setIssues(updatedIssues);
-  };
-
-  const userIssues = useMemo(() => issues.filter(issue => !issue.isAnonymous && issue.author.id === currentUser.id), [issues, currentUser.id]);
+  const userIssues = useMemo(() => {
+    if (!user) return [];
+    return issues.filter(issue => !issue.isAnonymous && issue.author.id === user.id)
+  }, [issues, user]);
 
   const renderPage = () => {
     switch (currentPage) {
       case Page.Home:
-        return <HomePage issues={issues} onSelectIssue={handleSelectIssue} onReportIssue={() => setReportModalOpen(true)} />;
+        return <HomePage 
+                  issues={issues} 
+                  onSelectIssue={handleSelectIssue} 
+                  onReportIssue={() => requireAuth(() => setReportModalOpen(true))} 
+                  heroContent={heroContent}
+                  onEditHero={() => setEditHeroModalOpen(true)}
+                />;
       case Page.Ministry:
         return <MinistriesPage />;
       case Page.Districts:
@@ -145,13 +163,20 @@ const App: React.FC = () => {
       case Page.SOS:
         return <EmergencyPage />;
       case Page.Profile:
+        if (!user) return <HomePage 
+            issues={issues} 
+            onSelectIssue={handleSelectIssue} 
+            onReportIssue={() => requireAuth(() => setReportModalOpen(true))}
+            heroContent={heroContent}
+            onEditHero={() => setEditHeroModalOpen(true)}
+            />;
         return <ProfilePage 
-                  user={currentUser} 
+                  user={user} 
                   userIssues={userIssues}
                   allIssues={issues}
-                  onUpdateUser={handleUpdateUser}
                   onSelectIssue={handleSelectIssue}
                   onBack={() => navigateTo(previousPage)}
+                  onEditProfile={handleEditProfile}
                 />;
       case Page.Map:
         return <MapPage issues={issues} onSelectIssue={handleSelectIssue} />;
@@ -160,7 +185,13 @@ const App: React.FC = () => {
       case Page.Settings:
         return <SettingsPage isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} />;
       default:
-        return <HomePage issues={issues} onSelectIssue={handleSelectIssue} onReportIssue={() => setReportModalOpen(true)} />;
+        return <HomePage 
+                  issues={issues} 
+                  onSelectIssue={handleSelectIssue} 
+                  onReportIssue={() => requireAuth(() => setReportModalOpen(true))} 
+                  heroContent={heroContent}
+                  onEditHero={() => setEditHeroModalOpen(true)}
+                />;
     }
   };
   
@@ -171,12 +202,19 @@ const App: React.FC = () => {
       <ProfileDrawer 
         isOpen={isDrawerOpen} 
         onClose={() => setDrawerOpen(false)} 
-        user={currentUser} 
+        user={user} 
         onNavigate={navigateTo}
+        onLogout={() => {
+          logout();
+          setDrawerOpen(false);
+          navigateTo(Page.Home);
+        }}
+        onEditProfile={handleEditProfile}
       />
       <Header 
-        user={currentUser}
-        onProfileClick={() => setDrawerOpen(true)}
+        user={user}
+        onAvatarClick={() => setDrawerOpen(true)}
+        onLoginClick={() => setLoginModalOpen(true)}
         onSearchClick={() => setSearchOpen(true)}
         showBackButton={!isBottomNavVisible}
         onBack={() => navigateTo(previousPage)}
@@ -186,7 +224,12 @@ const App: React.FC = () => {
       </main>
       {isBottomNavVisible && <BottomNav currentPage={currentPage} setCurrentPage={navigateTo} />}
       
-      {selectedIssue && <IssueDetailModal issue={selectedIssue} onClose={handleCloseModal} onUpdateStatus={handleUpdateIssueStatus} />}
+      {selectedIssue && <IssueDetailModal 
+        issue={selectedIssue} 
+        onClose={handleCloseModal} 
+        onUpdateIssue={handleUpdateIssue} 
+        onRequireAuth={() => setLoginModalOpen(true)}
+      />}
       {isSearchOpen && <SearchModal 
         onClose={() => setSearchOpen(false)}
         issues={issues}
@@ -194,9 +237,35 @@ const App: React.FC = () => {
         districts={MOCK_DISTRICTS}
         onSelectIssue={handleSelectIssueFromSearch}
       />}
-      <ReportIssueModal isOpen={isReportModalOpen} onClose={() => setReportModalOpen(false)} onAddIssue={handleAddIssue} />
+      <ReportIssueModal isOpen={isReportModalOpen} onClose={() => setReportModalOpen(false)} onAddIssue={handleAddIssue} currentUser={user} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setLoginModalOpen(false)} />
+       {user && <EditProfileModal
+        isOpen={isEditModalOpen}
+        user={user}
+        onClose={() => setEditModalOpen(false)}
+        onSave={updateUser}
+      />}
+      {isAdmin && <EditHeroModal 
+        isOpen={isEditHeroModalOpen}
+        onClose={() => setEditHeroModalOpen(false)}
+        heroContent={heroContent}
+        onSave={(newContent) => {
+            setHeroContent(newContent);
+            setEditHeroModalOpen(false);
+        }}
+      />}
     </div>
   );
 };
+
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <CitizenVoiceApp />
+    </AuthProvider>
+  );
+};
+
 
 export default App;

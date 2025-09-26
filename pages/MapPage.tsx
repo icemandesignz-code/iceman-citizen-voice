@@ -8,7 +8,6 @@ declare const L: any;
 const categoryColors: { [key in IssueCategory]: string } = {
   [IssueCategory.Infrastructure]: '#FB8500', // Accent
   [IssueCategory.Health]: '#D00000',         // Danger
-  // FIX: Corrected a typo from `Issue-Category.Education` to `IssueCategory.Education`.
   [IssueCategory.Education]: '#0077B6',      // Primary
   [IssueCategory.Environment]: '#4CAF50',    // Success
   [IssueCategory.Security]: '#03045E',       // Dark

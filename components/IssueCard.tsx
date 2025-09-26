@@ -124,6 +124,7 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [highlightedText, setHighlightedText] = useState({ title: '', summary: '' });
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const summaryLimit = 120;
@@ -133,9 +134,41 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
     ? `${issue.summary.substring(0, summaryLimit)}...` 
     : issue.summary;
     
-  // Cleanup speech synthesis on component unmount
+  // Effect to find a better voice and cleanup speech synthesis on unmount
   useEffect(() => {
+    const getVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const priorityKeywords = ['Google', 'Microsoft', 'Samantha', 'Alex', 'Daniel', 'Zira'];
+        const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
+        
+        let bestVoice: SpeechSynthesisVoice | null = null;
+
+        // Try to find a high-quality voice by keyword
+        for (const keyword of priorityKeywords) {
+          bestVoice = englishVoices.find(voice => voice.name.includes(keyword)) || null;
+          if (bestVoice) break;
+        }
+
+        // If no priority voice found, fall back to the first available US English voice
+        if (!bestVoice) {
+            bestVoice = englishVoices.find(voice => voice.lang === 'en-US') || null;
+        }
+        
+        // If still no US voice, take the first English voice
+        if (!bestVoice) {
+            bestVoice = englishVoices[0] || null;
+        }
+
+        setSelectedVoice(bestVoice);
+      }
+    };
+
+    getVoices();
+    window.speechSynthesis.onvoiceschanged = getVoices;
+
     return () => {
+      window.speechSynthesis.onvoiceschanged = null;
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
       }
@@ -158,6 +191,10 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
       const utterance = new SpeechSynthesisUtterance(textToRead);
       utteranceRef.current = utterance;
 
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
       utterance.onboundary = (event) => {
         const titleLength = issue.title.length + 2; // title + ". "
         if (event.charIndex < titleLength) {
@@ -173,8 +210,10 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelectIssue }) => {
         utteranceRef.current = null;
       };
       
-      utterance.onerror = (err) => {
-        console.error("Speech synthesis error", err);
+      utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+        if (event.error !== 'canceled' && event.error !== 'interrupted') {
+          console.error("Speech synthesis error:", event.error);
+        }
         setIsSpeaking(false);
         setHighlightedText({ title: '', summary: '' });
       };
