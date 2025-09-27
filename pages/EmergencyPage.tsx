@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { PhoneIcon } from '../constants';
 
@@ -21,7 +22,6 @@ const EmergencyCard: React.FC<{ service: typeof emergencyServices[0] }> = ({ ser
 const EmergencyPage: React.FC = () => {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-dark dark:text-white text-center">Emergency Services (SOS)</h2>
       <p className="text-gray-600 dark:text-gray-300 text-center">Tap a service to call immediately.</p>
       
       <div className="grid grid-cols-2 gap-4">

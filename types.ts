@@ -97,3 +97,27 @@ export interface HeroContent {
   type: 'gradient' | 'image' | 'video';
   url: string | null;
 }
+
+export enum ResourceCategory {
+    OilAndGas = 'Oil & Gas',
+    Mining = 'Mining',
+    Agriculture = 'Agriculture',
+    Logging = 'Logging',
+    Fisheries = 'Fisheries',
+}
+
+export interface ResourceDataPoint {
+    label: string;
+    value: string;
+}
+
+export interface Resource {
+    id: string;
+    title: string;
+    category: ResourceCategory;
+    location: string;
+    description: string;
+    isLive: boolean;
+    timestamp: string;
+    dataPoints: ResourceDataPoint[];
+}

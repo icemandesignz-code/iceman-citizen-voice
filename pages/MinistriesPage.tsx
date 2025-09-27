@@ -25,7 +25,6 @@ const MinistriesPage: React.FC = () => {
     
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-dark dark:text-white">Government Ministries</h2>
       
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <h3 className="font-bold text-md text-gray-800 dark:text-gray-200 mb-4">Issue Resolution Rate</h3>

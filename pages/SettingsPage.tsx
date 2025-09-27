@@ -10,7 +10,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ isDarkMode, onToggleDarkMod
   return (
     <div className="flex flex-col items-center justify-center h-full text-center pt-16">
       <SettingsIcon className="w-20 h-20 text-gray-300 dark:text-gray-600 mb-4" />
-      <h2 className="text-2xl font-bold text-dark dark:text-white">Settings</h2>
       <p className="text-lg text-gray-500 dark:text-gray-400 mt-2">Manage your app preferences.</p>
       <div className="mt-8 text-left w-full max-w-sm space-y-4">
         <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border dark:border-gray-700">

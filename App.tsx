@@ -21,6 +21,18 @@ import LoginModal from './components/LoginModal';
 import EditProfileModal from './components/EditProfileModal';
 import EditHeroModal from './components/EditHeroModal';
 
+const PAGE_TITLES: { [key in Page]?: string } = {
+  [Page.Home]: "Citizen's Voice",
+  [Page.Ministry]: "Government Ministries",
+  [Page.Districts]: "Administrative Districts",
+  [Page.Resources]: "Resources Watch",
+  [Page.SOS]: "Emergency Services (SOS)",
+  [Page.Profile]: "My Profile",
+  [Page.Map]: "Issues Map",
+  [Page.Communities]: "Community Hub",
+  [Page.Settings]: "Settings",
+};
+
 const CitizenVoiceApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
   const [previousPage, setPreviousPage] = useState<Page>(Page.Home);
@@ -196,6 +208,7 @@ const CitizenVoiceApp: React.FC = () => {
   };
   
   const isBottomNavVisible = [Page.Home, Page.Ministry, Page.Districts, Page.Resources, Page.SOS].includes(currentPage);
+  const headerTitle = PAGE_TITLES[currentPage] || "Citizen's Voice";
 
   return (
     <div className="min-h-screen font-sans bg-background text-gray-800 flex flex-col max-w-lg mx-auto shadow-2xl relative dark:bg-gray-900 dark:text-gray-200">
@@ -212,6 +225,7 @@ const CitizenVoiceApp: React.FC = () => {
         onEditProfile={handleEditProfile}
       />
       <Header 
+        title={headerTitle}
         user={user}
         onAvatarClick={() => setDrawerOpen(true)}
         onLoginClick={() => setLoginModalOpen(true)}
@@ -219,7 +233,7 @@ const CitizenVoiceApp: React.FC = () => {
         showBackButton={!isBottomNavVisible}
         onBack={() => navigateTo(previousPage)}
       />
-      <main className={`flex-grow px-4 ${isBottomNavVisible ? 'pb-20' : ''}`}>
+      <main className={`flex-grow px-4 pt-2 ${isBottomNavVisible ? 'pb-20' : ''}`}>
         {renderPage()}
       </main>
       {isBottomNavVisible && <BottomNav currentPage={currentPage} setCurrentPage={navigateTo} />}

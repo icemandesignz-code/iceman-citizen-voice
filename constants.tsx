@@ -1,4 +1,4 @@
-import { Issue, Ministry, District, IssueCategory, IssueStatus, IssuePriority, User } from './types';
+import { Issue, Ministry, District, IssueCategory, IssueStatus, IssuePriority, User, Resource, ResourceCategory } from './types';
 import React from 'react';
 
 // Mock Users
@@ -140,6 +140,80 @@ export const MOCK_DISTRICTS: District[] = [
     { id: 'd10', name: 'Upper Demerara-Berbice', region: 'Region 10', population: 39992, issuesReported: 150, issuesResolved: 110 },
 ];
 
+export const MOCK_RESOURCES: Resource[] = [
+  {
+    id: 'res1',
+    title: 'Gold Mining Operations',
+    category: ResourceCategory.Mining,
+    location: 'Region 7 (Cuyuni-Mazaruni)',
+    description: 'Current gold mining production and pricing data.',
+    isLive: true,
+    timestamp: '9d ago',
+    dataPoints: [
+      { label: 'Revenue', value: '$1.7M' },
+      { label: 'Gold Price', value: '$3681.54/oz' },
+      { label: 'Production', value: '1184 oz' },
+    ],
+  },
+  {
+    id: 'res2',
+    title: 'Rice Production',
+    category: ResourceCategory.Agriculture,
+    location: 'Region 2 (Pomeroon-Supenaam)',
+    description: 'Annual rice production statistics and export data.',
+    isLive: true,
+    timestamp: '2d ago',
+    dataPoints: [
+      { label: 'Yield', value: '5.8 tons/ha' },
+      { label: 'Export Vol', value: '510,000 tons' },
+      { label: 'Area', value: '88,000 ha' },
+    ],
+  },
+  {
+    id: 'res3',
+    title: 'Offshore Oil Extraction',
+    category: ResourceCategory.OilAndGas,
+    location: 'Stabroek Block',
+    description: 'Daily oil production from major offshore fields.',
+    isLive: true,
+    timestamp: '1h ago',
+    dataPoints: [
+      { label: 'Production', value: '645,000 bpd' },
+      { label: 'Brent Price', value: '$82.60/bbl' },
+      { label: 'Active Rigs', value: '6' },
+    ],
+  },
+  {
+    id: 'res4',
+    title: 'Timber Exports',
+    category: ResourceCategory.Logging,
+    location: 'Region 10 (Upper Demerara-Berbice)',
+    description: 'Monthly timber export volumes and species data.',
+    isLive: false,
+    timestamp: '1mo ago',
+    dataPoints: [
+      { label: 'Volume', value: '35,000 m³' },
+      { label: 'Value', value: '$4.2M' },
+      { label: 'Top Species', value: 'Greenheart' },
+    ],
+  },
+    {
+    id: 'res5',
+    title: 'Bauxite Mining',
+    category: ResourceCategory.Mining,
+    location: 'Linden, Region 10',
+    description: 'Quarterly bauxite production and export data.',
+    isLive: false,
+    timestamp: '2w ago',
+    dataPoints: [
+      { label: 'Production', value: '1.2M tons' },
+      { label: 'Export Value', value: '$55M' },
+      { label: 'Grade', value: 'Metallurgical' },
+    ],
+  },
+];
+
+
 // Icons
 export const HomeIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -251,4 +325,17 @@ export const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" {...props}>
         <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v7.028C18.343 21.128 22 16.991 22 12z" />
     </svg>
+);
+
+export const TrendingUpIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+);
+export const TagIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+);
+export const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+);
+export const RefreshCwIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
 );
